@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html class="" lang="en">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="./assets/styles/primeone-light@3.3.1.css" rel="stylesheet" />
+  <link href="./assets/styles/primeicons.css" rel="stylesheet" />
   <link href="./assets/styles/primeflex@3.3.1.css" rel="stylesheet" />
   <script src="./assets/scripts/vue@3.js"></script>
   <script src="./assets/scripts/primevue@4.0.2.js" defer></script>
@@ -13,33 +13,40 @@
 </head>
 
 <body>
-  <div id="root">
+  <div id="root" class="">
     <div class="flex justify-content-center">
-      <p-card class="w-max px-4 my-4 surface-200">
+      <p-card class="w-max px-4 my-4">
         <template #header>
-          <h4>
-            Money Managment
-          </h4>
+          <div class="flex justify-content-between align-items-center">
+            <h4>
+              Money Managment
+            </h4>
+            <p-button :icon="'pi ' + themeIcon " text rounded :class="isDark? 'text-yellow-300' : 'text-black-alpha-90'"
+              @click="toggleDarkMode" />
+          </div>
         </template>
         <template #content>
           <div class="field grid">
             <label class="w-5rem" for="balance">Balance</label>
             <div class="col">
-              <p-input-number class="w-15rem" :min="0" prefix="$" mode="decimal" :min-fraction-digits="2" :max-fraction-digits="2" inputId="balance" v-model="balance" />
+              <p-input-number class="w-15rem" :min="0" prefix="$" mode="decimal" :min-fraction-digits="2"
+                :max-fraction-digits="2" inputId="balance" v-model="balance" />
             </div>
           </div>
 
           <div class="field grid">
             <label class="w-5rem" for="risk">Risk(%)</label>
             <div class="col flex flex-column">
-              <p-input-number class="w-15rem" prefix="%" mode="decimal" :min-fraction-digits="2" :max-fraction-digits="2" inputId="risk" v-model="risk" />
+              <p-input-number class="w-15rem" prefix="%" mode="decimal" :min-fraction-digits="2"
+                :max-fraction-digits="2" inputId="risk" v-model="risk" />
             </div>
           </div>
 
           <div class="field grid">
             <label class="w-5rem" for="sl">SL(%)</label>
             <div class="col">
-              <p-input-number class="w-15rem" prefix="%" mode="decimal" :min-fraction-digits="2" :max-fraction-digits="2" inputId="sl" v-model="sl" />
+              <p-input-number class="w-15rem" prefix="%" mode="decimal" :min-fraction-digits="2"
+                :max-fraction-digits="2" inputId="sl" v-model="sl" />
             </div>
           </div>
 
@@ -61,8 +68,9 @@
     </div>
   </div>
   <script type="module">
-    
-    const { createApp, ref, computed } = Vue;
+
+    const { createApp, ref, computed, onMounted } = Vue;
+    const { definePreset } = PrimeVue;
 
     const app = createApp({
       setup() {
@@ -70,6 +78,7 @@
         const risk = ref(0);
         const sl = ref(0);
         const levrage = ref(1);
+        const isDark = ref(null);
 
         const invest = computed(() => {
           const loseMoney = (balance.value * risk.value / 100);
@@ -77,25 +86,54 @@
           return ((loseMoney * 100) / levrageRisk || 0).toFixed(2);
         })
 
+
+
+        const themeIcon = computed(() => {
+          return isDark.value ? 'pi-sun' : 'pi-moon';
+        })
+
+        onMounted(() => {
+          isDark.value = localStorage.getItem('dark') == 'true' ? true : false;
+          if (isDark.value) {
+            document.querySelector('html').classList.add('app-dark');
+          }
+        })
+
+        const toggleDarkMode = () => {
+          const el = document.querySelector('html');
+          isDark.value = !isDark.value;
+          el.classList.toggle('app-dark');
+          localStorage.setItem('dark', isDark.value);
+        }
+
         return {
           balance,
           risk,
           sl,
           levrage,
-          invest
+          invest,
+          toggleDarkMode,
+          isDark,
+          themeIcon
         }
       }
     });
 
     app.use(PrimeVue.Config, {
       theme: {
-        preset: PrimeVue.Themes.Aura
+        preset: PrimeVue.Themes.Aura,
+        options: {
+          prefix: '',
+          darkModeSelector: '.app-dark',
+          cssLayer: false
+        }
       }
     });
 
     app.component('p-card', PrimeVue.Card);
     app.component('p-input-number', PrimeVue.InputNumber);
-    
+    app.component('p-button', PrimeVue.Button);
+
     app.mount('#root');
   </script>
 </body>
