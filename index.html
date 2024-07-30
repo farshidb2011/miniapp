@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="./assets/styles/primeone-light@3.3.1.css" rel="stylesheet" />
+  <link href="./assets/styles/primeflex@3.3.1.css" rel="stylesheet" />
+  <script src="./assets/scripts/vue@3.js"></script>
+  <script src="./assets/scripts/primevue@4.0.2.js" defer></script>
+  <script src="./assets/scripts/aura@4.0.2.js" defer></script>
+  <title>Money Management</title>
+</head>
+
+<body>
+  <div id="root">
+    <div class="flex justify-content-center">
+      <p-card class="w-max px-4 my-4 surface-200">
+        <template #header>
+          <h4>
+            Money Managment
+          </h4>
+        </template>
+        <template #content>
+          <div class="field grid">
+            <label class="w-5rem" for="balance">Balance</label>
+            <div class="col">
+              <p-input-number class="w-15rem" :min="0" prefix="$" mode="decimal" :min-fraction-digits="2" :max-fraction-digits="2" inputId="balance" v-model="balance" />
+            </div>
+          </div>
+
+          <div class="field grid">
+            <label class="w-5rem" for="risk">Risk(%)</label>
+            <div class="col flex flex-column">
+              <p-input-number class="w-15rem" prefix="%" mode="decimal" :min-fraction-digits="2" :max-fraction-digits="2" inputId="risk" v-model="risk" />
+            </div>
+          </div>
+
+          <div class="field grid">
+            <label class="w-5rem" for="sl">SL(%)</label>
+            <div class="col">
+              <p-input-number class="w-15rem" prefix="%" mode="decimal" :min-fraction-digits="2" :max-fraction-digits="2" inputId="sl" v-model="sl" />
+            </div>
+          </div>
+
+          <div class="field grid">
+            <label class="w-5rem" for="levrage">Levrage</label>
+            <div class="col">
+              <p-input-number class="w-15rem" :min="1" inputId="levrage" v-model="levrage" />
+            </div>
+          </div>
+        </template>
+        <template #footer>
+
+          <div class="field grid">
+            <label class="w-5rem" for="">Invest</label>
+            <p-input-number disabled class="w-15rem ml-2" prefix="$" inputId="invest" v-model="invest" />
+          </div>
+        </template>
+      </p-card>
+    </div>
+  </div>
+  <script type="module">
+    
+    const { createApp, ref, computed } = Vue;
+
+    const app = createApp({
+      setup() {
+        const balance = ref(0);
+        const risk = ref(0);
+        const sl = ref(0);
+        const levrage = ref(1);
+
+        const invest = computed(() => {
+          const loseMoney = (balance.value * risk.value / 100);
+          const levrageRisk = (sl.value * levrage.value);
+          return ((loseMoney * 100) / levrageRisk || 0).toFixed(2);
+        })
+
+        return {
+          balance,
+          risk,
+          sl,
+          levrage,
+          invest
+        }
+      }
+    });
+
+    app.use(PrimeVue.Config, {
+      theme: {
+        preset: PrimeVue.Themes.Aura
+      }
+    });
+
+
+    app.component('p-card', PrimeVue.Card);
+    app.component('p-input-number', PrimeVue.InputNumber);
+    app.component('p-slider', PrimeVue.Slider);
+
+
+    app.mount('#root');
+  </script>
+</body>
+
+</html>
