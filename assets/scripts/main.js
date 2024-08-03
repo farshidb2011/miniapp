@@ -1,4 +1,4 @@
-const { createApp, ref, computed, onMounted, onBeforeMount, unref } = Vue;
+const { createApp, ref, computed, onMounted, onBeforeMount, unref, watch } = Vue;
 const { definePreset } = PrimeVue;
 
 const app = createApp({
@@ -9,22 +9,41 @@ const app = createApp({
     const balance = ref();
     const risk = ref();
     const sl = ref();
-    const levrage = ref(1);
+    const leverage = ref(1);
+    const riskModePercent = ref(true);
     const isDark = ref(0);
 
-    const invest = computed(() => {
-      const loseMoney = (balance.value * risk.value / 100);
-      const levrageRisk = (sl.value * levrage.value);
+    const calculate = ()=>{
+      let loseMoney;
+      if (riskModePercent.value) {
+        loseMoney = (balance.value * risk.value / 100);
+      } else {
+        loseMoney = (risk.value * 100) / balance.value;
+      }
+      const levrageRisk = (sl.value * leverage.value);
       saveData();
-      return ((loseMoney * 100) / levrageRisk || 0).toFixed(2);
+      return Number(((loseMoney * 100) / levrageRisk || 0).toFixed(2));
+    }
+
+    const invest = computed(calculate);
+
+    const convert = computed(() => {
+      let result;
+      if (riskModePercent.value) {
+        result = (balance.value * risk.value / 100);
+      } else {
+        result = (risk.value * 100) / balance.value;
+      }
+      return Number(result.toFixed(2));
     })
 
     const saveData = () => {
       store.save({
-        balance : unref(balance),
-        risk : unref(risk),
-        sl : unref(sl),
-        levrage : unref(levrage)
+        balance: unref(balance),
+        risk: unref(risk),
+        sl: unref(sl),
+        leverage: unref(leverage),
+        riskModePercent: unref(riskModePercent),
       });
     }
 
@@ -39,7 +58,8 @@ const app = createApp({
         balance.value = item.balance;
         risk.value = item.risk;
         sl.value = item.sl;
-        levrage.value = item.levrage;
+        leverage.value = item.leverage;
+        riskModePercent.value = item.riskModePercent;
       }
     })
 
@@ -61,11 +81,13 @@ const app = createApp({
       balance,
       risk,
       sl,
-      levrage,
+      leverage,
       invest,
       toggleDarkMode,
       isDark,
-      themeIcon
+      themeIcon,
+      riskModePercent,
+      convert
     }
   }
 });
@@ -81,11 +103,14 @@ app.use(PrimeVue.Config, {
   }
 });
 
+app.directive('tooltip', PrimeVue.Tooltip);
+
 app.component('p-card', PrimeVue.Card);
 app.component('p-input-text', PrimeVue.InputText);
 app.component('p-input-number', PrimeVue.InputNumber);
 app.component('p-button', PrimeVue.Button);
-
+app.component('p-icon-field', PrimeVue.IconField);
+app.component('p-input-icon', PrimeVue.InputIcon);
 app.mount('#root');
 
 
