@@ -1,10 +1,11 @@
 const { createApp, ref, computed, onMounted, onBeforeMount, unref, watch } = Vue;
-const { definePreset } = PrimeVue;
+const { definePreset, useConfirm} = PrimeVue;
 
 const app = createApp({
   setup() {
 
     const store = useStore('riskM-1');
+    const confirm = useConfirm();
 
     const balance = ref();
     const risk = ref();
@@ -12,6 +13,27 @@ const app = createApp({
     const leverage = ref(1);
     const riskModePercent = ref(true);
     const isDark = ref(0);
+
+    const confirmClearCache = (event) => {
+      confirm.require({
+          target: event.currentTarget,
+          message: 'Are you sure you want to proceed?',
+          icon: 'pi pi-exclamation-triangle',
+          rejectProps: {
+              label: 'Cancel',
+              severity: 'secondary',
+              outlined: true
+          },
+          acceptProps: {
+              label: 'Clean & fix'
+          },
+          accept: () => {
+            clearCache();
+          },
+          reject: () => {
+          }
+      });
+  };
 
     const calculate = ()=>{
       let loseMoney;
@@ -36,6 +58,11 @@ const app = createApp({
       }
       return Number(result.toFixed(2));
     })
+
+    const clearCache = ()=>{
+      store.removeStore();
+      window.location.reload();
+    }
 
     const saveData = () => {
       store.save({
@@ -87,7 +114,8 @@ const app = createApp({
       isDark,
       themeIcon,
       riskModePercent,
-      convert
+      convert,
+      confirmClearCache
     }
   }
 });
@@ -103,6 +131,8 @@ app.use(PrimeVue.Config, {
   }
 });
 
+app.use(PrimeVue.ConfirmationService);
+
 app.directive('tooltip', PrimeVue.Tooltip);
 
 app.component('p-card', PrimeVue.Card);
@@ -111,6 +141,7 @@ app.component('p-input-number', PrimeVue.InputNumber);
 app.component('p-button', PrimeVue.Button);
 app.component('p-icon-field', PrimeVue.IconField);
 app.component('p-input-icon', PrimeVue.InputIcon);
+app.component('p-confirm-popup', PrimeVue.ConfirmPopup);
 app.mount('#root');
 
 
