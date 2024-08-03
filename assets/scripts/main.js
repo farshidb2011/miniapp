@@ -36,12 +36,10 @@ const app = createApp({
   };
 
     const calculate = ()=>{
-      let loseMoney;
+      let loseMoney = risk.value;
       if (riskModePercent.value) {
         loseMoney = (balance.value * risk.value / 100);
-      } else {
-        loseMoney = (risk.value * 100) / balance.value;
-      }
+      } 
       const levrageRisk = (sl.value * leverage.value);
       saveData();
       return Number(((loseMoney * 100) / levrageRisk || 0).toFixed(2));
